@@ -1,10 +1,10 @@
-import { config } from '../config';
+import { defineConfig } from '../config';
 import { useBuild, useBundle, useTests } from './fixtures';
 
 useBuild();
 
 describe('Without options', () => {
-  const { writeCjs, writeEsm } = useBundle(config());
+  const { writeCjs, writeEsm } = useBundle(defineConfig());
 
   test('#1 Write esm', ...writeEsm);
 

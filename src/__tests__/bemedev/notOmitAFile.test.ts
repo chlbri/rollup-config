@@ -1,11 +1,11 @@
-import { config } from '../../config';
+import { defineConfig } from '../../config';
 import { path, useBuild, useBundle, useTests } from '../fixtures';
 
 useBuild();
 
 describe('bemedev options', () => {
   const { writeCjs, writeEsm } = useBundle(
-    config.bemedev({ sourcemap: true }),
+    defineConfig.bemedev({ sourcemap: true }),
   );
 
   test('#1 Write esm', ...writeEsm);

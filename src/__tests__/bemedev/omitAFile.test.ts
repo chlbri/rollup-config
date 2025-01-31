@@ -1,11 +1,13 @@
-import { config } from '../../config';
+import { defineConfig } from '../../config';
 import { path, useBuild, useBundle, useTests } from '../fixtures';
 
 useBuild();
 
 describe('bemedev omit "fileInt"', () => {
   const { writeCjs, writeEsm } = useBundle(
-    config.bemedev({ ignoresJS: `${process.cwd()}/src/**/${path}.ts` }),
+    defineConfig.bemedev({
+      ignoresJS: `${process.cwd()}/src/**/${path}.ts`,
+    }),
   );
 
   test('#1 Write esm', ...writeEsm);

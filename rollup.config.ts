@@ -1,3 +1,3 @@
-import { config } from './src';
+import { defineConfig } from './src';
 
-export default config.bemedev();
+export default defineConfig.bemedev();
