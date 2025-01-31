@@ -1,4 +1,4 @@
-import { defineConfig } from 'rollup';
+import { defineConfig as _defineConfig } from 'rollup';
 import { circularDependencies } from 'rollup-plugin-circular-dependencies';
 import { nodeExternals } from 'rollup-plugin-node-externals';
 //@ts-expect-error for build
@@ -14,11 +14,11 @@ import { buildInput } from './input';
 import type { Config_F } from './types';
 import { toArray } from './utils';
 
-export const config: Config_F = additionals => {
-  return config.default(additionals);
+export const defineConfig: Config_F = additionals => {
+  return defineConfig.default(additionals);
 };
 
-config.default = additionals => {
+defineConfig.default = additionals => {
   // #region constants
   const input = buildInput(...toArray(additionals?.ignoresJS));
   const dir = additionals?.dir ?? DEFAULT_DIR;
@@ -32,7 +32,7 @@ config.default = additionals => {
       : additionals.sourcemap === true;
   // #endregion
 
-  return defineConfig({
+  return _defineConfig({
     input,
     plugins: [
       tscAlias(),
@@ -76,7 +76,7 @@ config.default = additionals => {
   });
 };
 
-config.bemedev = additionals => {
+defineConfig.bemedev = additionals => {
   // #region constants
   const circularDeps = DEFAULT_CIRCULAR_DEPS.concat(
     toArray(additionals?.circularDeps),
@@ -92,7 +92,7 @@ config.bemedev = additionals => {
   const sourcemap = _sourcemap === undefined || _sourcemap === true;
   // #endregion
 
-  return config.default({
+  return defineConfig.default({
     ...additionals,
     circularDeps,
     excludesTS,

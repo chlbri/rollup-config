@@ -1,12 +1,36 @@
-# Beatifull lib
+# My Rollup config
 
-A beautifull description
+A simple config for rollup <br/>
+
+## Installation
+
+```sh
+npm install --save-dev @bemedev/rollup-config
+# ou
+pnpm add -D @bemedev/rollup-config
+# ou
+yarn add -D @bemedev/rollup-config
+```
+
+<br/>
+
+## Utilisation
+
+Dans votre fichier **_rollup.config.ts_** :
+
+```ts
+import { defineConfig } from '@bemedev/rollup-config';
+
+export default defineConfig();
+```
 
 <br/>
 
 ## Licence
 
 MIT
+
+<br/>
 
 ## CHANGE_LOG
 
@@ -16,9 +40,19 @@ MIT
 ...
 </summary>
 
-### Version [0.0.1] --> _date & hour_
+### Version [0.1.1] --> _2025/01/30 01:00_
 
-- ✨ Première version de la bibliothèque
+- Ajoute la configuration de base pour Rollup
+- Intègre les plugins nécessaires : `rollup-plugin-circular-dependencies`,
+  `rollup-plugin-node-externals`, `rollup-plugin-tsc-alias`,
+  `rollup-plugin-tsconfig-paths`, `rollup-plugin-typescript2`
+- Configure les entrées et sorties pour les formats ES et CJS
+- Gère les dépendances circulaires et externes
+- Ajoute la prise en charge des chemins TypeScript et des alias
+- Configure les options de compilation TypeScript, y compris
+  `declarationMap`
+- Ajoute des options supplémentaires pour la configuration par défaut et la
+  configuration spécifique `bemedev`
 
 </details>
 
