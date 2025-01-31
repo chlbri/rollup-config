@@ -4,8 +4,8 @@
     "lib": ["dom", "esnext"],
     "importHelpers": true,
     "target": "ESNext",
+    "module": "ESNext",
     "declaration": true,
-    "sourceMap": true,
     "rootDir": "./src",
     "outDir": "./lib",
     "resolveJsonModule": true,
@@ -21,7 +21,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "declarationMap": true
+    "noEmit": true
   }
 }

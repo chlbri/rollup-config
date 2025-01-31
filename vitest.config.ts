@@ -6,13 +6,16 @@ import tsconfig from './tsconfig.json';
 export default defineConfig({
   plugins: [
     aliasTs(tsconfig as any),
-    exclude({ ignoreCoverageFiles: ['**/index.ts'] }),
+    exclude({
+      ignoreCoverageFiles: ['**/index.ts', '**/types.ts', '**/*.types.ts'],
+    }),
   ],
   test: {
     bail: 10,
     maxConcurrency: 10,
     passWithNoTests: true,
     slowTestThreshold: 3000,
+    fileParallelism: false,
     globals: true,
     logHeapUsage: true,
     coverage: {
@@ -22,5 +25,6 @@ export default defineConfig({
       all: true,
       provider: 'v8',
     },
+    globalSetup: './vitest.setup.ts',
   },
 });
