@@ -1,14 +1,27 @@
+import { rm } from 'node:fs/promises';
 import { defineConfig } from '../../config';
-import { path, useBuild, useBundle, useTests } from '../fixtures';
+import {
+  configurePath,
+  path,
+  useBuild,
+  useBundle,
+  useTests,
+} from '../fixtures';
 
 useBuild();
 
 describe('bemedev options', () => {
+  configurePath();
+
   const { writeCjs, writeEsm } = useBundle(
     defineConfig.bemedev({ sourcemap: true }),
   );
 
-  test('#1 Write esm', ...writeEsm);
+  afterAll(() => {
+    return rm(`./src/${path}.ts`, { force: true });
+  });
+
+  test(...writeEsm(1));
 
   describe(
     '#2 => Check files',
@@ -70,7 +83,7 @@ describe('bemedev options', () => {
     }),
   );
 
-  test('#3 Write commonjs', ...writeCjs);
+  test(...writeCjs(3));
 
   describe(
     '#4 => Checks files',

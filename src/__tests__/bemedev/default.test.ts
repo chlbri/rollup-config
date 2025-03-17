@@ -6,7 +6,7 @@ useBuild();
 describe('bemedev options', () => {
   const { writeCjs, writeEsm } = useBundle(defineConfig.bemedev());
 
-  test('#1 Write esm', ...writeEsm);
+  test(...writeEsm(1));
 
   describe(
     '#2 => Check files',
@@ -62,7 +62,7 @@ describe('bemedev options', () => {
     }),
   );
 
-  test('#3 Write commonjs', ...writeCjs);
+  test(...writeCjs(3));
 
   describe(
     '#4 => Checks files',

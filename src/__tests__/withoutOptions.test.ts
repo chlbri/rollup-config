@@ -6,7 +6,7 @@ useBuild();
 describe('Without options', () => {
   const { writeCjs, writeEsm } = useBundle(defineConfig());
 
-  test('#1 Write esm', ...writeEsm);
+  test(...writeEsm(1));
 
   describe(
     '#2 => Check files - no map - no cjs',
@@ -62,7 +62,7 @@ describe('Without options', () => {
     }),
   );
 
-  test('#3 Write commonjs', ...writeCjs);
+  test(...writeCjs(3));
 
   describe(
     '#4 => Checks files - no map - with cjs',

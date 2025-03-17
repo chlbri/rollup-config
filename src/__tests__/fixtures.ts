@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { rollup, type RollupBuild, type RollupOptions } from 'rollup';
 import { toArray } from '../utils';
@@ -16,6 +16,8 @@ export const useBuild = () => {
 };
 
 export const useBundle = (options: RollupOptions) => {
+  configurePath();
+
   const bundle = vi.fn<() => RollupBuild>();
   const esm = toArray(options.output)[0];
   const cjs = toArray(options.output)[1];
@@ -29,8 +31,21 @@ export const useBundle = (options: RollupOptions) => {
     WAITER,
   );
 
-  const writeEsm = [() => bundle().write(esm), WAITER] as const;
-  const writeCjs = [() => bundle().write(cjs), WAITER] as const;
+  const writeEsm = (index: number) => {
+    return [
+      `#${index} => Write esm`,
+      () => bundle().write(esm),
+      WAITER,
+    ] as const;
+  };
+
+  const writeCjs = (index: number) => {
+    return [
+      `#${index} => Write cjs`,
+      () => bundle().write(cjs),
+      WAITER,
+    ] as const;
+  };
 
   return {
     writeEsm,
@@ -86,3 +101,13 @@ export const useTests = (options: Options) => {
 };
 
 export const path = 'fileInt';
+
+export const configurePath = () => {
+  const content = `export const A = 'A';`;
+  const cFile = `${process.cwd()}/src/${path}.ts`;
+  writeFileSync(cFile, content);
+
+  afterAll(() => {
+    return rm(`./src/${path}.ts`, { force: true });
+  });
+};

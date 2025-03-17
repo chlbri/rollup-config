@@ -8,7 +8,7 @@ describe('bemedev options - with declarationMap', () => {
     defineConfig.bemedev({ declarationMap: true }),
   );
 
-  test('#1 Write esm', ...writeEsm);
+  test(...writeEsm(1));
 
   describe(
     '#2 => Check files',
@@ -64,7 +64,7 @@ describe('bemedev options - with declarationMap', () => {
     }),
   );
 
-  test('#3 Write commonjs', ...writeCjs);
+  test(...writeCjs(3));
 
   describe(
     '#4 => Checks files',
