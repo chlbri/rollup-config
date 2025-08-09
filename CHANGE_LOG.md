@@ -3,6 +3,13 @@
 <br/>
 <br/>
 
+### Version [0.1.2] --> _2025/08/09 03:00_
+
+- Upgrade deps
+- Coverage : **100%**
+
+<br/>
+
 ### Version [0.1.1] --> _2025/01/30 01:00_
 
 - Ajoute la configuration de base pour Rollup
