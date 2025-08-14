@@ -5,7 +5,9 @@ useBuild();
 
 describe('bemedev options - with declarationMap', () => {
   const { writeCjs, writeEsm } = useBundle(
-    defineConfig.bemedev({ declarationMap: true }),
+    defineConfig.bemedev({
+      declarationMap: true,
+    }),
   );
 
   test('#1 Write esm', ...writeEsm);

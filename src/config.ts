@@ -21,7 +21,7 @@ export const defineConfig: Config_F = additionals => {
 defineConfig.default = additionals => {
   // #region constants
   const ignoresJS = toArray(additionals?.ignoresJS);
-  const input = buildInput(...ignoresJS);
+  const input = buildInput();
   const dir = additionals?.dir ?? DEFAULT_DIR;
   const declarationMap = additionals?.declarationMap;
   const exclude = DEFAULT_EXCLUDE.concat(toArray(additionals?.excludesTS));
@@ -36,14 +36,13 @@ defineConfig.default = additionals => {
   return _defineConfig({
     input,
     plugins: [
+      tscAlias(),
       typescript({
         tsconfigOverride: {
           exclude,
-          include: ignoresJS,
           compilerOptions: { declarationMap },
         },
       }),
-      tscAlias(),
       tsConfigPaths(),
 
       circularDependencies({
@@ -55,57 +54,13 @@ defineConfig.default = additionals => {
         builtinsPrefix: 'strip',
       }),
       {
-        // name: 'end-bemedev',
-        // buildEnd: {
-        //   order: 'post',
-        //   handler: () => {
-        //     try {
-        //       // Read tsconfig.json from CWD to determine declaration and declarationMap
-        //       // If there are ignores, remove their emitted artifacts from the output directory
-        //       if (ignoresJS.length > 0) {
-        //         // Normalize ignore patterns to target src/* files
-        //         // const patterns = ignoresJS.map(p =>
-        //         //   p.startsWith('src/')
-        //         //     ? p
-        //         //     : p.startsWith('**')
-        //         //       ? `src/${p}`
-        //         //       : `src/**/${p}`,
-        //         // );
-        //         const files = new Set<string>();
-        //         for (const pat of ignoresJS) {
-        //           for (const file of globSync(pat, { nodir: true })) {
-        //             files.add(file);
-        //           }
-        //         }
-        //         for (const file of files) {
-        //           const withoutExt = file.slice(
-        //             0,
-        //             file.length - extname(file).length,
-        //           );
-        //           const rel = pathRelative('src', withoutExt);
-        //           const baseOut = pathResolve(process.cwd(), dir, rel);
-        //           console.log(`Cleaning up ${baseOut}`);
-        //           // JS outputs
-        //           rmSync(`${baseOut}.js`, { force: true });
-        //           rmSync(`${baseOut}.cjs`, { force: true });
-        //           if (sourcemap) {
-        //             rmSync(`${baseOut}.js.map`, { force: true });
-        //             rmSync(`${baseOut}.cjs.map`, { force: true });
-        //           }
-        //           // Typings
-        //           // if (emitDeclarations) {
-        //           //   rmSync(`${baseOut}.d.ts`, { force: true });
-        //           //   if (emitDeclarationMap)
-        //           //     rmSync(`${baseOut}.d.ts.map`, { force: true });
-        //           // }
-        //         }
-        //       }
-        //       console.log('Build finished');
-        //     } catch (err) {
-        //       console.warn('[end-bemedev] cleanup failed:', err);
-        //     }
-        //   },
-        // },
+        name: 'end-bemedev',
+        options: {
+          order: 'post',
+          handler: options => {
+            return { ...options, input: buildInput(...ignoresJS) };
+          },
+        },
       },
     ],
     external,
