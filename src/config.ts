@@ -1,3 +1,5 @@
+import { globSync } from 'glob';
+import { relative } from 'node:path';
 import { defineConfig as _defineConfig } from 'rollup';
 import { circularDependencies } from 'rollup-plugin-circular-dependencies';
 import { nodeExternals } from 'rollup-plugin-node-externals';
@@ -11,6 +13,7 @@ import {
   DEFAULT_DIR,
   DEFAULT_EXCLUDE,
 } from './constants';
+import { cleanupJS, withoutExtension } from './helpers';
 import { buildInput } from './input';
 import { toArray } from './utils';
 
@@ -22,11 +25,17 @@ defineConfig.default = additionals => {
   // #region constants
   const ignoresJS = toArray(additionals?.ignoresJS);
   const include = buildInput(...toArray(additionals?.excludesTS));
-  const input = buildInput(...ignoresJS);
+  const input = buildInput();
   const dir = additionals?.dir ?? DEFAULT_DIR;
   const declarationMap = additionals?.declarationMap;
   const exclude = DEFAULT_EXCLUDE.concat(toArray(additionals?.excludesTS));
   const external = additionals?.externals;
+
+  const EMPTY_CHUNKS = ignoresJS
+    .map(f => globSync(f))
+    .flat()
+    .map(withoutExtension)
+    .map(file => relative('src', file));
 
   const sourcemap =
     additionals?.sourcemap === undefined
@@ -55,28 +64,38 @@ defineConfig.default = additionals => {
         optDeps: false,
         builtinsPrefix: 'strip',
       }),
+
       {
         name: 'end-bemedev',
-        renderStart: {
-          // order: 'post',
+        writeBundle: {
+          order: 'post',
           handler: () => {
-            // if (ignoresJS.length > 0) {
-            //   try {
-            //     const files = new Set<string>();
-            //     ignoresJS.forEach(pat => {
-            //       const globs = globSync(pat, { nodir: true });
-            //       globs.forEach(file => files.add(file));
-            //     });
-            //     cleanupJS(files, dir, sourcemap);
-            //     console.log('Build finished');
-            //   } catch (err) {
-            //     console.error('[end-bemedev] cleanup failed:', err);
-            //   }
-            // }
+            if (ignoresJS.length > 0) {
+              try {
+                const files = new Set<string>();
+                ignoresJS.forEach(pat => {
+                  const globs = globSync(pat, { nodir: true });
+                  globs.forEach(file => files.add(file));
+                });
+                cleanupJS(files, dir, sourcemap);
+                console.log('Build finished');
+              } catch (err) {
+                console.error('[end-bemedev] cleanup failed:', err);
+              }
+            }
           },
         },
       },
     ],
+
+    onwarn: (warning, defaultHandler) => {
+      const isEmpty =
+        warning.code === 'EMPTY_BUNDLE' &&
+        warning.names?.every(name => EMPTY_CHUNKS.includes(name));
+
+      if (isEmpty) return;
+      defaultHandler(warning);
+    },
     external,
     output: [
       {
