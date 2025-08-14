@@ -1,12 +1,17 @@
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
-import { rollup, type RollupBuild, type RollupOptions } from 'rollup';
+import { rollup, type RollupOptions } from 'rollup';
 import { toArray } from '../utils';
 
 export const WAITER = 100_000;
 
 export const useBuild = () => {
-  afterAll(() => {
+  const cFile = `${process.cwd()}/src/${path}.ts`;
+  const content = `export const A = 'A';`;
+  writeFileSync(cFile, content);
+
+  afterAll(async () => {
+    await rm(cFile);
     return rm('./lib', { recursive: true, force: true });
   });
 
@@ -16,21 +21,25 @@ export const useBuild = () => {
 };
 
 export const useBundle = (options: RollupOptions) => {
-  const bundle = vi.fn<() => RollupBuild>();
   const esm = toArray(options.output)[0];
   const cjs = toArray(options.output)[1];
 
-  test(
-    '#0 => Config',
+  const writeEsm = [
     async () => {
       const out = await rollup(options);
-      bundle.mockReturnValue(out);
+      await out.write(esm);
+      await out.close();
     },
     WAITER,
-  );
-
-  const writeEsm = [() => bundle().write(esm), WAITER] as const;
-  const writeCjs = [() => bundle().write(cjs), WAITER] as const;
+  ] as const;
+  const writeCjs = [
+    async () => {
+      const out = await rollup(options);
+      await out.write(cjs);
+      await out.close();
+    },
+    WAITER,
+  ] as const;
 
   return {
     writeEsm,
@@ -55,7 +64,7 @@ type Output = Partial<
     input: boolean;
     types: boolean;
     utils: boolean;
-  } & Record<string, any>
+  } & Record<string, boolean>
 >;
 
 export const useTests = (options: Options) => {

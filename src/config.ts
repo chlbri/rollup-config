@@ -32,7 +32,7 @@ defineConfig.default = additionals => {
   const external = additionals?.externals;
 
   const EMPTY_CHUNKS = ignoresJS
-    .map(f => globSync(f))
+    .map(f => globSync(f, { nodir: true }))
     .flat()
     .map(withoutExtension)
     .map(file => relative('src', file));
@@ -67,7 +67,7 @@ defineConfig.default = additionals => {
 
       {
         name: 'end-bemedev',
-        writeBundle: {
+        closeBundle: {
           order: 'post',
           handler: () => {
             if (ignoresJS.length > 0) {
@@ -96,6 +96,7 @@ defineConfig.default = additionals => {
       if (isEmpty) return;
       defaultHandler(warning);
     },
+
     external,
     output: [
       {
