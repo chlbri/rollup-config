@@ -21,7 +21,8 @@ export const defineConfig: Config_F = additionals => {
 defineConfig.default = additionals => {
   // #region constants
   const ignoresJS = toArray(additionals?.ignoresJS);
-  const input = buildInput();
+  const include = buildInput(...toArray(additionals?.excludesTS));
+  const input = buildInput(...ignoresJS);
   const dir = additionals?.dir ?? DEFAULT_DIR;
   const declarationMap = additionals?.declarationMap;
   const exclude = DEFAULT_EXCLUDE.concat(toArray(additionals?.excludesTS));
@@ -40,6 +41,7 @@ defineConfig.default = additionals => {
       typescript({
         tsconfigOverride: {
           exclude,
+          include,
           compilerOptions: { declarationMap },
         },
       }),
@@ -55,10 +57,22 @@ defineConfig.default = additionals => {
       }),
       {
         name: 'end-bemedev',
-        options: {
-          order: 'post',
-          handler: options => {
-            return { ...options, input: buildInput(...ignoresJS) };
+        renderStart: {
+          // order: 'post',
+          handler: () => {
+            // if (ignoresJS.length > 0) {
+            //   try {
+            //     const files = new Set<string>();
+            //     ignoresJS.forEach(pat => {
+            //       const globs = globSync(pat, { nodir: true });
+            //       globs.forEach(file => files.add(file));
+            //     });
+            //     cleanupJS(files, dir, sourcemap);
+            //     console.log('Build finished');
+            //   } catch (err) {
+            //     console.error('[end-bemedev] cleanup failed:', err);
+            //   }
+            // }
           },
         },
       },

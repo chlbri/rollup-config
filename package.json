@@ -1,6 +1,6 @@
 {
   "name": "@bemedev/rollup-config",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A simple config for rollup",
   "author": {
     "email": "bri_lvi@icloud.com",
