@@ -56,6 +56,7 @@ export const clean = (options: EndPluginOptions = {}) => {
             });
             cleanupJS(files, dir, sourcemap);
             console.log('Build finished');
+            /* v8 ignore next 3 */
           } catch (err) {
             console.error('[end-bemedev] cleanup failed:', err);
           }

@@ -3,6 +3,14 @@
 <br/>
 <br/>
 
+### Version [0.2.0] --> _2025/09/05 13:40_
+
+- Upgrade deps
+- Add options to add custom plugins
+- Coverage : **95%**
+
+<br/>
+
 ### Version [0.1.2] --> _2025/08/09 03:00_
 
 - Upgrade deps
