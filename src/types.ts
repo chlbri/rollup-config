@@ -1,4 +1,5 @@
-import type { RollupOptions } from 'rollup';
+import type { Plugin, RollupOptions } from 'rollup';
+import type { PLUGIN_BUILDERS } from './plugins';
 
 export type ToArray_F = <T>(value?: T | T[]) => T[];
 
@@ -10,6 +11,7 @@ export type Params = {
   dir?: string;
   sourcemap?: boolean;
   declarationMap?: boolean;
+  plugins?: (Plugin | keyof typeof PLUGIN_BUILDERS)[];
 };
 
 export type BuildInput_F = (

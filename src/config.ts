@@ -1,121 +1,98 @@
-import { globSync } from 'glob';
-import { relative } from 'node:path';
+// import { globSync } from 'glob';
+// import { relative } from 'node:path';
 import { defineConfig as _defineConfig } from 'rollup';
-import { circularDependencies } from 'rollup-plugin-circular-dependencies';
-import { nodeExternals } from 'rollup-plugin-node-externals';
-import type { Config_F } from './types';
-//@ts-expect-error for bundling
-import tscAlias from 'rollup-plugin-tsc-alias';
-import tsConfigPaths from 'rollup-plugin-tsconfig-paths';
-import typescript from 'rollup-plugin-typescript2';
 import {
   DEFAULT_CIRCULAR_DEPS,
   DEFAULT_DIR,
   DEFAULT_EXCLUDE,
 } from './constants';
-import { cleanupJS, withoutExtension } from './helpers';
 import { buildInput } from './input';
+import { buildOutput } from './output';
+import { PLUGIN_BUILDERS } from './plugins';
+import type { Config_F, Params } from './types';
 import { toArray } from './utils';
 
 export const defineConfig: Config_F = additionals => {
   return defineConfig.default(additionals);
 };
 
-defineConfig.default = additionals => {
-  // #region constants
-  const ignoresJS = toArray(additionals?.ignoresJS);
-  const include = buildInput(...toArray(additionals?.excludesTS));
+const producePlugins = ({
+  circularDeps,
+  ignoresJS,
+  dir = DEFAULT_DIR,
+  sourcemap = false,
+  excludesTS,
+  declarationMap,
+  plugins,
+}: Params = {}) => {
+  const include = buildInput(...toArray(excludesTS));
+  const exclude = DEFAULT_EXCLUDE.concat(toArray(excludesTS));
+
+  const unordered = {
+    alias: PLUGIN_BUILDERS.alias(),
+    typescript: PLUGIN_BUILDERS.typescript({
+      tsconfigOverride: {
+        exclude,
+        include,
+        compilerOptions: { declarationMap },
+      },
+    }),
+    circulars: PLUGIN_BUILDERS.circulars({
+      exclude: circularDeps,
+    }),
+    externals: PLUGIN_BUILDERS.externals({
+      // exclude peerDependencies and dependencies
+      optDeps: false,
+      builtinsPrefix: 'strip',
+      include: excludesTS,
+    }),
+    tsPaths: PLUGIN_BUILDERS.tsPaths({ colors: true }),
+    clean: PLUGIN_BUILDERS.clean({
+      ignoresJS,
+      sourcemap,
+      dir,
+    }),
+  };
+
+  const defaultOrdered = [
+    unordered.typescript,
+    unordered.circulars,
+    unordered.alias,
+    unordered.tsPaths,
+    unordered.externals,
+    unordered.clean,
+  ];
+
+  return plugins
+    ? plugins
+        .map(p => {
+          if (typeof p === 'string') return unordered[p];
+          return p;
+        })
+        .filter(p => !!p)
+    : defaultOrdered;
+};
+
+defineConfig.default = ({
+  dir = DEFAULT_DIR,
+  sourcemap = false,
+  ...rest
+}: Params = {}) => {
   const input = buildInput();
-  const dir = additionals?.dir ?? DEFAULT_DIR;
-  const declarationMap = additionals?.declarationMap;
-  const exclude = DEFAULT_EXCLUDE.concat(toArray(additionals?.excludesTS));
-  const external = additionals?.externals;
+  const external = rest.externals;
+  const output = buildOutput(dir, sourcemap);
 
-  const EMPTY_CHUNKS = ignoresJS
-    .map(f => globSync(f, { nodir: true }))
-    .flat()
-    .map(withoutExtension)
-    .map(file => relative('src', file));
-
-  const sourcemap =
-    additionals?.sourcemap === undefined
-      ? false
-      : additionals.sourcemap === true;
-  // #endregion
+  const plugins = producePlugins({
+    dir,
+    sourcemap,
+    ...rest,
+  });
 
   return _defineConfig({
     input,
-    plugins: [
-      tscAlias(),
-      typescript({
-        tsconfigOverride: {
-          exclude,
-          include,
-          compilerOptions: { declarationMap },
-        },
-      }),
-      tsConfigPaths(),
-
-      circularDependencies({
-        exclude: additionals?.circularDeps,
-      }),
-
-      nodeExternals({
-        optDeps: false,
-        builtinsPrefix: 'strip',
-      }),
-
-      {
-        name: 'end-bemedev',
-        closeBundle: {
-          order: 'post',
-          handler: () => {
-            if (ignoresJS.length > 0) {
-              try {
-                const files = new Set<string>();
-                ignoresJS.forEach(pat => {
-                  const globs = globSync(pat, { nodir: true });
-                  globs.forEach(file => files.add(file));
-                });
-                cleanupJS(files, dir, sourcemap);
-                console.log('Build finished');
-              } catch (err) {
-                console.error('[end-bemedev] cleanup failed:', err);
-              }
-            }
-          },
-        },
-      },
-    ],
-
-    onwarn: (warning, defaultHandler) => {
-      const isEmpty =
-        warning.code === 'EMPTY_BUNDLE' &&
-        warning.names?.every(name => EMPTY_CHUNKS.includes(name));
-
-      if (isEmpty) return;
-      defaultHandler(warning);
-    },
-
+    plugins,
     external,
-    output: [
-      {
-        format: 'es',
-        sourcemap,
-        preserveModulesRoot: 'src',
-        dir,
-        preserveModules: true,
-        entryFileNames: '[name].js',
-      },
-      {
-        format: 'cjs',
-        sourcemap,
-        preserveModulesRoot: 'src',
-        dir,
-        preserveModules: true,
-        entryFileNames: '[name].cjs',
-      },
-    ],
+    output,
   });
 };
 
