@@ -1,5 +1,6 @@
 // import { globSync } from 'glob';
 // import { relative } from 'node:path';
+import { toArray } from '#utils';
 import { defineConfig as _defineConfig } from 'rollup';
 import {
   DEFAULT_CIRCULAR_DEPS,
@@ -10,7 +11,6 @@ import { buildInput } from './input';
 import { buildOutput } from './output';
 import { PLUGIN_BUILDERS } from './plugins';
 import type { Config_F, Params } from './types';
-import { toArray } from './utils';
 
 export const defineConfig: Config_F = additionals => {
   return defineConfig.default(additionals);
@@ -56,9 +56,9 @@ const producePlugins = ({
 
   const defaultOrdered = [
     unordered.typescript,
-    unordered.circulars,
     unordered.alias,
     unordered.tsPaths,
+    unordered.circulars,
     unordered.externals,
     unordered.clean,
   ];

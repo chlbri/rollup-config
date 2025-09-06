@@ -20,7 +20,11 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "#utils": ["src/utils.ts"]
+    }
   },
   "include": ["src/**/*"]
 }
