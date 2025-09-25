@@ -3,6 +3,13 @@
 <br/>
 <br/>
 
+### Version [0.2.2] --> _2025/09/25 19:40_
+
+- Upgrade deps
+- Coverage : **95%**
+
+<br/>
+
 ### Version [0.2.0] --> _2025/09/05 13:40_
 
 - Upgrade deps
